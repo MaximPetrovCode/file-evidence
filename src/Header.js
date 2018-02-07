@@ -9,7 +9,8 @@ export default class Header extends Component {
         this.state = {
             listFile: [],
             hashFile: "",
-            name: ""
+            name: "",
+            timestamp: ""
         }
 
         this.handleChange = this.handleChange.bind(this);
@@ -18,17 +19,22 @@ export default class Header extends Component {
 
 
     handleChange(selectorFiles) {
-        console.log(selectorFiles);
+        // console.log(selectorFiles);
         // console.log(hash(selectorFiles.toString()));
+        var currentTime = Date();
         this.setState({ hashFile: hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate) });
         this.setState({ name: selectorFiles[0].name });
+        this.setState({ timestamp: currentTime });
 
         this.setState({
             listFile: this.state.listFile.concat({
                 name: selectorFiles[0].name,
-                hashFile: hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate)
+                hashFile: hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate),
+                timestamp: currentTime
             })
         })
+
+        console.log(currentTime);
 
     }
 
@@ -44,9 +50,66 @@ export default class Header extends Component {
                     <td>
                         {file.hashFile}
                     </td>
+                    <td>
+                        {file.timestamp}
+                    </td>
                 </tr>
             )
         })
+    }
+
+
+    renderTable() {
+        if (this.state.listFile.length > 0) {
+            return (
+                <div>
+                    <div className="row">
+                        <div className="col-md-3"></div>
+                        <div className="col-md-6">
+                            <div className="text-left">
+                                <h3>
+                                     
+                                    <label htmlFor="hash">Hash:</label>
+                                    <div id="hash">{this.state.hashFile}</div>
+                                </h3>
+                                <h4>
+                                    <label htmlFor="name">File:</label> 
+                                    <div id="name">{this.state.name}</div>
+                                </h4>
+                                <h4>
+                                    <label htmlFor="time">Timestamp:</label>
+                                    <div id="time">{this.state.timestamp}</div>
+                                </h4>
+                            </div>
+                        </div>
+                        <div className="col-md-3"></div>
+                    </div>
+
+
+                    <br />
+
+
+                    <div className="row">
+                        <div className="col-md-12">
+                            <div className="table-responsive">
+                                <table className="table table-bordered table-md-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th><h4>File Name</h4></th>
+                                            <th><h4>Hash</h4></th>
+                                            <th><h4>Timestamp</h4></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {this.renderListFile()}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
     }
 
 
@@ -66,41 +129,16 @@ export default class Header extends Component {
                             <input onChange={(e) => this.handleChange(e.target.files)} type="file" id="files" />
 
                         </div>
+
                         <br />
-                        <h2>Last file:</h2>
-                        <strong>
-                            <h3>
-                                Hash: {this.state.hashFile}
-                            </h3>
-                            <h4>
-                                File: {this.state.name}
-                            </h4>
-                        </strong>
 
 
-                        <div className="row">
-                            <div className="col-md-12">
-                                <div className="table-responsive">
-                                    <table className="table table-bordered table-md-responsive">
-                                        <thead>
-                                            <tr>
-                                                <th><h4>File Name</h4></th>
-                                                <th><h4>Hash</h4></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {this.renderListFile()}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+
+                        {this.renderTable()}
 
                     </div>
                 </header>
             </div>
         )
     }
-
-
 }
