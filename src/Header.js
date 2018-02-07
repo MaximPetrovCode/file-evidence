@@ -11,7 +11,7 @@ export default class Header extends Component {
             hashFile: "",
             name: "",
             timestamp: "",
-            exists: {},
+            exists: "",
         }
 
         this.handleChange = this.handleChange.bind(this);
@@ -24,6 +24,7 @@ export default class Header extends Component {
         var fileHash = await hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate);
 
         if (this.checkExistence(fileHash)) {
+            this.setState({exists: ""})
             var currentTime = Date();
             this.setState({ hashFile: fileHash });
             this.setState({ name: selectorFiles[0].name });
@@ -38,7 +39,7 @@ export default class Header extends Component {
             })
         }
         else {
-            this.setState({ exists: selectorFiles })
+            await this.setState({ exists: selectorFiles[0].name })
         }
 
     }
@@ -58,10 +59,11 @@ export default class Header extends Component {
 
 
     renderListFile() {
-        var arr = this.state.listFile.reverse();
+        // var arr = this.state.listFile.reverse();
+        var arr = this.state.listFile;        
         return arr.map(file => {
             return (
-                <tr>
+                <tr key={file.name}>
                     <td>
                         {file.name}
                     </td>
@@ -72,27 +74,30 @@ export default class Header extends Component {
                         {file.timestamp}
                     </td>
                 </tr>
-            )
+            );
         })
     }
 
+    
 
     renderCurrentFile() {
-        if (this.state.exists !== []) {
+        if (this.state.exists.length > 0) {
             return (
-            <div className="row">
-                <div className="col-md-3"></div>
-                <div className="col-md-6">
-                    <div className="text-left">
-                        <h3>
-                            <label htmlFor="hash">Hash:</label>
-                            <div id="hash">{this.state.exists[0]}</div>
-                        </h3>
+                <div className="row">
+                    <div className="col-md-3"></div>
+                    <div className="col-md-6">
+                        <div className="text-left">
+                            <h3>
+                                <label htmlFor="name">Hash already exists for file:</label>
+                                <div id="name">{this.state.exists}</div>
+                                
+                            </h3>
+                        </div>
                     </div>
+                    <div className="col-md-3"></div>
                 </div>
-                <div className="col-md-3"></div>
-            </div>);
-
+            );
+            
         }
         else {
             return (
@@ -167,9 +172,8 @@ export default class Header extends Component {
                         <div className="input-group">
                             <span className="input-group-addon" id="basic-addon1"></span>
 
-                            <label for="files" className="btn btn-primary btn-block">Select file</label>
+                            <label htmlFor="files" className="btn btn-primary btn-block">Select file</label>
                             <input onChange={(e) => this.handleChange(e.target.files)} type="file" id="files" />
-
                         </div>
 
                         <br />
