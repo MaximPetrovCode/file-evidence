@@ -10,7 +10,8 @@ export default class Header extends Component {
             listFile: [],
             hashFile: "",
             name: "",
-            timestamp: ""
+            timestamp: "",
+            exists: {},
         }
 
         this.handleChange = this.handleChange.bind(this);
@@ -18,24 +19,41 @@ export default class Header extends Component {
 
 
 
-    handleChange(selectorFiles) {
-        // console.log(selectorFiles);
-        // console.log(hash(selectorFiles.toString()));
-        var currentTime = Date();
-        this.setState({ hashFile: hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate) });
-        this.setState({ name: selectorFiles[0].name });
-        this.setState({ timestamp: currentTime });
+    async handleChange(selectorFiles) {
 
-        this.setState({
-            listFile: this.state.listFile.concat({
-                name: selectorFiles[0].name,
-                hashFile: hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate),
-                timestamp: currentTime
+        var fileHash = await hash(selectorFiles[0].size + selectorFiles[0].name + selectorFiles[0].type + selectorFiles[0].lastModified + selectorFiles[0].lastModifiedDate);
+
+        if (this.checkExistence(fileHash)) {
+            var currentTime = Date();
+            this.setState({ hashFile: fileHash });
+            this.setState({ name: selectorFiles[0].name });
+            this.setState({ timestamp: currentTime });
+
+            this.setState({
+                listFile: this.state.listFile.concat({
+                    name: selectorFiles[0].name,
+                    hashFile: fileHash,
+                    timestamp: currentTime
+                })
             })
-        })
+        }
+        else {
+            this.setState({ exists: selectorFiles })
+        }
 
-        console.log(currentTime);
+    }
 
+    checkExistence(fileHash) {
+        for (const object in this.state.listFile) {
+            if (this.state.listFile.hasOwnProperty(object)) {
+                const element = this.state.listFile[object];
+                if (element.hashFile === fileHash) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
 
@@ -59,40 +77,64 @@ export default class Header extends Component {
     }
 
 
+    renderCurrentFile() {
+        if (this.state.exists !== []) {
+            return (
+            <div className="row">
+                <div className="col-md-3"></div>
+                <div className="col-md-6">
+                    <div className="text-left">
+                        <h3>
+                            <label htmlFor="hash">Hash:</label>
+                            <div id="hash">{this.state.exists[0]}</div>
+                        </h3>
+                    </div>
+                </div>
+                <div className="col-md-3"></div>
+            </div>);
+
+        }
+        else {
+            return (
+                <div className="row">
+                    <div className="col-md-3"></div>
+                    <div className="col-md-6">
+                        <div className="text-left">
+                            <h3>
+                                <label htmlFor="hash">Hash:</label>
+                                <div id="hash">{this.state.hashFile}</div>
+                            </h3>
+                            <h4>
+                                <label htmlFor="name">File:</label>
+                                <div id="name">{this.state.name}</div>
+                            </h4>
+                            <h4>
+                                <label htmlFor="time">Timestamp:</label>
+                                <div id="time">{this.state.timestamp}</div>
+                            </h4>
+                        </div>
+                    </div>
+                    <div className="col-md-3"></div>
+                </div>
+            );
+        }
+
+    }
+
+
     renderTable() {
         if (this.state.listFile.length > 0) {
             return (
                 <div>
-                    <div className="row">
-                        <div className="col-md-3"></div>
-                        <div className="col-md-6">
-                            <div className="text-left">
-                                <h3>
-                                     
-                                    <label htmlFor="hash">Hash:</label>
-                                    <div id="hash">{this.state.hashFile}</div>
-                                </h3>
-                                <h4>
-                                    <label htmlFor="name">File:</label> 
-                                    <div id="name">{this.state.name}</div>
-                                </h4>
-                                <h4>
-                                    <label htmlFor="time">Timestamp:</label>
-                                    <div id="time">{this.state.timestamp}</div>
-                                </h4>
-                            </div>
-                        </div>
-                        <div className="col-md-3"></div>
-                    </div>
 
+                    {this.renderCurrentFile()}
 
                     <br />
-
 
                     <div className="row">
                         <div className="col-md-12">
                             <div className="table-responsive">
-                                <table className="table table-bordered table-md-responsive">
+                                <table className="table table-md-responsive">
                                     <thead>
                                         <tr>
                                             <th><h4>File Name</h4></th>
@@ -131,8 +173,6 @@ export default class Header extends Component {
                         </div>
 
                         <br />
-
-
 
                         {this.renderTable()}
 
